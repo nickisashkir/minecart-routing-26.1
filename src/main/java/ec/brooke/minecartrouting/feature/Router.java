@@ -1,41 +1,66 @@
 package ec.brooke.minecartrouting.feature;
 
-import ec.brooke.minecartrouting.MinecartRouting;
-import ec.brooke.minecartrouting.Utils;
 import ec.brooke.minecartrouting.store.DyeFilter;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Minecart;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockRedstoneEvent;
-import org.bukkit.inventory.InventoryHolder;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.ContainerEntity;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
-import java.util.Collection;
+import java.util.List;
 
-public class Router implements Listener {
+public class Router {
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    private void onBlockRedstone(BlockRedstoneEvent event) {
-        Block block = event.getBlock();
-        if (block.getType() != Material.DETECTOR_RAIL || event.getNewCurrent() == 0) return;
-        DyeFilter filter = MinecartRouting.FILTERS.get(block);
-        if (filter == null) return;
-
-        Location location = block.getLocation().add(0.5, 0.5, 0.5);
-        boolean passes = test(Utils.getNearbyEntities(Minecart.class, location, 0.2), filter);
-        event.setNewCurrent(passes ? 15 : 0);
+    public static boolean anyMatches(List<? extends AbstractMinecart> carts, DyeFilter filter) {
+        for (AbstractMinecart cart : carts) {
+            if (testEntity(cart, filter)) return true;
+        }
+        return false;
     }
 
-    private boolean test(Collection<? extends Entity> entities, DyeFilter filter) {
-        return entities.stream().anyMatch(entity ->
-            entity instanceof InventoryHolder holder
-            && holder.getInventory().all(Material.FILLED_MAP).values().stream().anyMatch(
-                item -> Ticket.isTicket(item) && filter.test(Ticket.getTicket(item)))
-            || test(entity.getPassengers(), filter)
-        );
+    private static boolean testEntity(Entity entity, DyeFilter filter) {
+        if (checkInventory(entity, filter)) return true;
+        for (Entity passenger : entity.getPassengers()) {
+            if (testEntity(passenger, filter)) return true;
+        }
+        return false;
+    }
+
+    private static boolean checkInventory(Entity entity, DyeFilter filter) {
+        if (entity instanceof Player player) {
+            return scanContainer(player.getInventory(), filter);
+        }
+        if (entity instanceof ContainerEntity vehicle) {
+            NonNullList<ItemStack> stacks = vehicle.getItemStacks();
+            return scanStacks(stacks, filter);
+        }
+        if (entity instanceof Container inv) {
+            return scanContainer(inv, filter);
+        }
+        return false;
+    }
+
+    private static boolean scanContainer(Container inv, DyeFilter filter) {
+        for (int i = 0; i < inv.getContainerSize(); i++) {
+            if (matches(inv.getItem(i), filter)) return true;
+        }
+        return false;
+    }
+
+    private static boolean scanStacks(Iterable<ItemStack> stacks, DyeFilter filter) {
+        for (ItemStack stack : stacks) {
+            if (matches(stack, filter)) return true;
+        }
+        return false;
+    }
+
+    private static boolean matches(ItemStack stack, DyeFilter filter) {
+        if (!stack.is(Items.FILLED_MAP)) return false;
+        DyeColor color = Ticket.getTicket(stack);
+        return color != null && filter.test(color);
     }
 }

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "minecraft:orange_dye"
+  ],
+  "result": {
+    "id": "minecraft:filled_map",
+    "count": 1,
+    "components": {
+      "minecraft:item_name": {"text": "Minecart Ticket"},
+      "minecraft:lore": [
+        {"text": "Orange Ticket", "color": "#F9801D", "italic": false}
+      ],
+      "minecraft:map_color": 16351261,
+      "minecraft:custom_data": {
+        "minecart_routing:ticket": "orange"
+      }
+    }
+  }
+}

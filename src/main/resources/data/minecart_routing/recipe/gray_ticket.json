@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "minecraft:gray_dye"
+  ],
+  "result": {
+    "id": "minecraft:filled_map",
+    "count": 1,
+    "components": {
+      "minecraft:item_name": {"text": "Minecart Ticket"},
+      "minecraft:lore": [
+        {"text": "Gray Ticket", "color": "#474F52", "italic": false}
+      ],
+      "minecraft:map_color": 4673362,
+      "minecraft:custom_data": {
+        "minecart_routing:ticket": "gray"
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "minecraft:pink_dye"
+  ],
+  "result": {
+    "id": "minecraft:filled_map",
+    "count": 1,
+    "components": {
+      "minecraft:item_name": {"text": "Minecart Ticket"},
+      "minecraft:lore": [
+        {"text": "Pink Ticket", "color": "#F38BAA", "italic": false}
+      ],
+      "minecraft:map_color": 15961002,
+      "minecraft:custom_data": {
+        "minecart_routing:ticket": "pink"
+      }
+    }
+  }
+}

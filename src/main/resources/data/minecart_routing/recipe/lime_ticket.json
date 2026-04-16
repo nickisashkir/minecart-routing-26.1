@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "minecraft:lime_dye"
+  ],
+  "result": {
+    "id": "minecraft:filled_map",
+    "count": 1,
+    "components": {
+      "minecraft:item_name": {"text": "Minecart Ticket"},
+      "minecraft:lore": [
+        {"text": "Lime Ticket", "color": "#80C71F", "italic": false}
+      ],
+      "minecraft:map_color": 8439583,
+      "minecraft:custom_data": {
+        "minecart_routing:ticket": "lime"
+      }
+    }
+  }
+}

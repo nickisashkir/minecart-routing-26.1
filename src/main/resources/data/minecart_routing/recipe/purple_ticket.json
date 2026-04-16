@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:paper",
+    "minecraft:purple_dye"
+  ],
+  "result": {
+    "id": "minecraft:filled_map",
+    "count": 1,
+    "components": {
+      "minecraft:item_name": {"text": "Minecart Ticket"},
+      "minecraft:lore": [
+        {"text": "Purple Ticket", "color": "#8932B8", "italic": false}
+      ],
+      "minecraft:map_color": 8991416,
+      "minecraft:custom_data": {
+        "minecart_routing:ticket": "purple"
+      }
+    }
+  }
+}
