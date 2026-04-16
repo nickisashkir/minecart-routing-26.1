@@ -1,6 +1,8 @@
 # ![minecart routing](assets/logo.svg)
 
-A Minecraft plugin for Spigot/Paper/Purpur which adds ticket based filtering for detector rails. This enables the creation of advanced minecart routing systems.
+Hi! I'm Nicky! I have a fabric server at https://theremnants.gg/ and I love this addon! So I updated it to use Fabric and to be on 26.1.
+
+A Minecraft plugin for ~Spigot/Paper/Purpur~ Fabric which adds ticket based filtering for detector rails. This enables the creation of advanced minecart routing systems.
 
 Minecart Routing is entirely server-side, clients don't need to install anything for the plugin to function.
 
