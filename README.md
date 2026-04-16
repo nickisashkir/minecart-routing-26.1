@@ -23,16 +23,6 @@ Filtered detector rails can also be inverted, so that they only activate with an
 Drop the built jar into your server's `mods/` folder. No client-side
 install required — vanilla clients connect as normal.
 
----
-
-## Building from source
-
-```
-./gradlew build
-```
-
-Output jar: `build/libs/minecart-routing-<version>.jar`.
-
 ## Toolchain pins
 
 - Minecraft `26.1` (deobfuscated jar — no `client_mappings` published
@@ -48,38 +38,6 @@ Output jar: `build/libs/minecart-routing-<version>.jar`.
 
 No `mappings` dependency is declared, no `modImplementation`. This mirrors
 Fabric's own 26.1 build setup.
-
-## API verification (against the 26.1 deobf jar)
-
-Every class and method used by the mod was checked with `javap` against
-`minecraft-merged-deobf-26.1.jar`. Verified:
-
-- `Identifier.fromNamespaceAndPath(ns, path)` at `net.minecraft.resources.Identifier`
-- `AbstractMinecart` at `net.minecraft.world.entity.vehicle.minecart.AbstractMinecart`
-- `Level.isClientSide()` method (shadow-private field with same name, must use method call)
-- `LevelChunk.markUnsaved()` no-arg
-- `Entity.entityTags()` returns `Set<String>`, `Entity.addTag(String)`, `Entity.getPassengers()` returns `List<Entity>`
-- `Player.getInventory()` returns `Inventory` (at `net.minecraft.world.entity.player.Inventory`, implements `Container`)
-- `Container.getContainerSize()`, `Container.getItem(int)` at `net.minecraft.world.Container`
-- `ContainerEntity.getItemStacks()` returns `NonNullList<ItemStack>`
-- `CompoundTag.getString(key)` returns `Optional<String>`
-- `CustomData.copyTag()` returns `CompoundTag`, `DataComponents.CUSTOM_DATA` exists
-- `BlockState.is(Block)` via `TypedInstance<Block>`, `BlockState.getValue(Property)` via `StateHolder`
-- `ItemStack.is(Item)` via `ItemInstance → TypedInstance<Item>`
-- `Display.ItemDisplay(EntityType, Level)` ctor public, `getSlot(int)` public, `SlotAccess.set(ItemStack)` public
-- `Vec3.atCenterOf(Vec3i)` (BlockPos extends Vec3i), `Entity.setPos(Vec3)` final on Entity
-- `Level.getEntities(EntityTypeTest, AABB, Predicate)` with `EntityType<T> implements EntityTypeTest<Entity, T>`
-- `DetectorRailBlock.SHAPE`, `DetectorRailBlock.POWERED` public static fields
-- `DetectorRailBlock.checkPressed(Level, BlockPos, BlockState)` private method
-- `DetectorRailBlock.getInteractingMinecartOfType(Level, BlockPos, Class, Predicate)` private method on DetectorRailBlock
-- Fabric API `UseBlockCallback.interact(Player, Level, InteractionHand, BlockHitResult) → InteractionResult`
-- Fabric API `AttackBlockCallback.interact(Player, Level, InteractionHand, BlockPos, Direction) → InteractionResult`
-- Fabric API `AttachmentRegistry.<A>builder().persistent(Codec<A>).initializer(Supplier<A>).buildAndRegister(Identifier)`
-- Fabric API `AttachmentTarget.getAttached / setAttached / getAttachedOrCreate / markUnsaved` injected on `LevelChunk`
-
-Private methods (`Display.setTransformation`, `Display.ItemDisplay.setItemStack`) are reached via an accessor mixin and `display.getSlot(0).set(stack)` respectively.
-
-## How it works
 
 - **Recipes.** 16 shapeless JSON recipes in `data/minecart_routing/recipe/`.
   Each combines paper + a dye to produce a vanilla `filled_map` stamped
