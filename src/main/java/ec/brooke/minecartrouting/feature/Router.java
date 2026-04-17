@@ -24,13 +24,15 @@ public class Router {
     }
 
     public static void notifyPassengers(List<? extends AbstractMinecart> carts, Filter filter, boolean matched) {
-        String name = formatTag(filter.tag());
+        String label = filter.shortText();
         Component msg = matched
-                ? Component.literal(name + " ticket found, routing to " + name + " path")
-                : Component.literal(name + " ticket not found, not staying on path");
+                ? Component.literal(label + " ticket found, routing to " + label + " path")
+                : Component.literal(label + " ticket not found, not staying on path");
 
         for (AbstractMinecart cart : carts) {
-            collectPlayers(cart).forEach(p -> p.sendOverlayMessage(msg));
+            for (Player p : collectPlayers(cart)) {
+                p.sendOverlayMessage(msg);
+            }
         }
     }
 
@@ -45,17 +47,6 @@ public class Router {
         for (Entity passenger : entity.getPassengers()) {
             collectPlayersRecursive(passenger, out);
         }
-    }
-
-    static String formatTag(String tag) {
-        String[] words = tag.split("_");
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < words.length; i++) {
-            if (i > 0) sb.append(' ');
-            sb.append(Character.toUpperCase(words[i].charAt(0)));
-            sb.append(words[i].substring(1));
-        }
-        return sb.toString();
     }
 
     private static boolean testEntity(Entity entity, Filter filter) {

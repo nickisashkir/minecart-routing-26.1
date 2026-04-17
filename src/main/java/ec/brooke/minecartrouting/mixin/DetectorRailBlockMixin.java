@@ -48,7 +48,7 @@ public abstract class DetectorRailBlockMixin {
 
         if (!level.getBlockState(pos).is(Blocks.DETECTOR_RAIL)) {
             if (level instanceof ServerLevel serverLevel) {
-                Assigner.update(serverLevel, pos, null);
+                Assigner.updateFilter(serverLevel, pos, null);
             }
             return original;
         }
