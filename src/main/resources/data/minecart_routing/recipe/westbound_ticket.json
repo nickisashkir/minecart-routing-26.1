@@ -3,8 +3,8 @@
   "category": "misc",
   "pattern": [
     "   ",
-    "CP ",
-    "   "
+    " P ",
+    "C  "
   ],
   "key": {
     "C": "minecraft:compass",
