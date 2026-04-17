@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "   ",
+    " PC",
+    "   "
+  ],
+  "key": {
+    "C": "minecraft:compass",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "id": "minecraft:filled_map",
+    "count": 1,
+    "components": {
+      "minecraft:item_name": {"text": "Eastbound Ticket"},
+      "minecraft:lore": [
+        {"text": "Eastbound Ticket", "color": "#FFFF55", "italic": false}
+      ],
+      "minecraft:map_color": 16777045,
+      "minecraft:custom_data": {
+        "minecart_routing:ticket": "eastbound"
+      }
+    }
+  }
+}

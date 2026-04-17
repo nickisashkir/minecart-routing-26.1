@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "   ",
+    " P ",
+    " C "
+  ],
+  "key": {
+    "C": "minecraft:compass",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "id": "minecraft:filled_map",
+    "count": 1,
+    "components": {
+      "minecraft:item_name": {"text": "Southbound Ticket"},
+      "minecraft:lore": [
+        {"text": "Southbound Ticket", "color": "#FF5555", "italic": false}
+      ],
+      "minecraft:map_color": 16733525,
+      "minecraft:custom_data": {
+        "minecart_routing:ticket": "southbound"
+      }
+    }
+  }
+}

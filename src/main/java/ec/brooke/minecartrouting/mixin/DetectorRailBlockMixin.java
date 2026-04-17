@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import ec.brooke.minecartrouting.feature.Assigner;
 import ec.brooke.minecartrouting.feature.Router;
-import ec.brooke.minecartrouting.store.DyeFilter;
+import ec.brooke.minecartrouting.store.Filter;
 import ec.brooke.minecartrouting.store.FilterAttachment;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -43,7 +43,7 @@ public abstract class DetectorRailBlockMixin {
             @Local(argsOnly = true) Level level,
             @Local(argsOnly = true) BlockPos pos
     ) {
-        DyeFilter filter = FilterAttachment.get(level, pos);
+        Filter filter = FilterAttachment.get(level, pos);
         if (filter == null) return original;
 
         if (!level.getBlockState(pos).is(Blocks.DETECTOR_RAIL)) {
@@ -53,6 +53,8 @@ public abstract class DetectorRailBlockMixin {
             return original;
         }
 
-        return Router.anyMatches(original, filter) ? original : List.of();
+        boolean matched = Router.anyMatches(original, filter);
+        Router.notifyPassengers(original, filter, matched);
+        return matched ? original : List.of();
     }
 }

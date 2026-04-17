@@ -13,13 +13,13 @@ import java.util.Map;
 
 public class FilterAttachment {
 
-    public static final Codec<Map<BlockPos, DyeFilter>> MAP_CODEC =
-            Codec.unboundedMap(BlockPos.CODEC, DyeFilter.CODEC);
+    public static final Codec<Map<BlockPos, Filter>> MAP_CODEC =
+            Codec.unboundedMap(BlockPos.CODEC, Filter.CODEC);
 
-    public static AttachmentType<Map<BlockPos, DyeFilter>> FILTERS;
+    public static AttachmentType<Map<BlockPos, Filter>> FILTERS;
 
     public static void register() {
-        FILTERS = AttachmentRegistry.<Map<BlockPos, DyeFilter>>builder()
+        FILTERS = AttachmentRegistry.<Map<BlockPos, Filter>>builder()
                 .persistent(MAP_CODEC)
                 .initializer(HashMap::new)
                 .buildAndRegister(MinecartRoutingMod.id("filters"));
@@ -29,15 +29,15 @@ public class FilterAttachment {
         return level.getChunk(pos.getX() >> 4, pos.getZ() >> 4);
     }
 
-    public static DyeFilter get(Level level, BlockPos pos) {
+    public static Filter get(Level level, BlockPos pos) {
         LevelChunk chunk = chunkAt(level, pos);
-        Map<BlockPos, DyeFilter> map = chunk.getAttached(FILTERS);
+        Map<BlockPos, Filter> map = chunk.getAttached(FILTERS);
         return map == null ? null : map.get(pos);
     }
 
-    public static void put(Level level, BlockPos pos, DyeFilter filter) {
+    public static void put(Level level, BlockPos pos, Filter filter) {
         LevelChunk chunk = chunkAt(level, pos);
-        Map<BlockPos, DyeFilter> map = chunk.getAttachedOrCreate(FILTERS);
+        Map<BlockPos, Filter> map = chunk.getAttachedOrCreate(FILTERS);
         map.put(pos.immutable(), filter);
         chunk.setAttached(FILTERS, map);
         chunk.markUnsaved();
@@ -45,7 +45,7 @@ public class FilterAttachment {
 
     public static void remove(Level level, BlockPos pos) {
         LevelChunk chunk = chunkAt(level, pos);
-        Map<BlockPos, DyeFilter> map = chunk.getAttached(FILTERS);
+        Map<BlockPos, Filter> map = chunk.getAttached(FILTERS);
         if (map == null) return;
         if (map.remove(pos) == null) return;
         chunk.setAttached(FILTERS, map.isEmpty() ? null : map);

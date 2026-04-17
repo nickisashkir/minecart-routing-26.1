@@ -2,7 +2,7 @@ package ec.brooke.minecartrouting.feature;
 
 import ec.brooke.minecartrouting.Utils;
 import ec.brooke.minecartrouting.mixin.DisplayAccessor;
-import ec.brooke.minecartrouting.store.DyeFilter;
+import ec.brooke.minecartrouting.store.Filter;
 import ec.brooke.minecartrouting.store.FilterAttachment;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -18,6 +18,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DetectorRailBlock;
@@ -48,7 +49,7 @@ public class Assigner {
         if (!state.is(Blocks.DETECTOR_RAIL)) return InteractionResult.PASS;
 
         ItemStack held = player.getItemInHand(hand);
-        DyeFilter current = FilterAttachment.get(level, pos);
+        Filter current = FilterAttachment.get(level, pos);
 
         if (held.isEmpty()) {
             if (current == null) return InteractionResult.PASS;
@@ -57,13 +58,30 @@ public class Assigner {
             return InteractionResult.SUCCESS;
         }
 
-        DyeColor dye = Utils.ITEM_TO_DYE.get(held.getItem());
-        if (dye == null) return InteractionResult.PASS;
-        if (current != null && current.color() == dye && current.whitelist()) return InteractionResult.PASS;
+        // Check if holding a ticket (color or direction)
+        String ticketTag = Ticket.getTicket(held);
+        if (ticketTag != null) {
+            if (current != null && current.tag().equals(ticketTag) && current.whitelist()) {
+                return InteractionResult.PASS;
+            }
+            level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1f, 1f);
+            update((ServerLevel) level, pos, new Filter(ticketTag, true));
+            return InteractionResult.SUCCESS;
+        }
 
-        level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1f, 1f);
-        update((ServerLevel) level, pos, new DyeFilter(dye, true));
-        return InteractionResult.SUCCESS;
+        // Check if holding a dye
+        DyeColor dye = Utils.ITEM_TO_DYE.get(held.getItem());
+        if (dye != null) {
+            String dyeTag = dye.name().toLowerCase();
+            if (current != null && current.tag().equals(dyeTag) && current.whitelist()) {
+                return InteractionResult.PASS;
+            }
+            level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1f, 1f);
+            update((ServerLevel) level, pos, new Filter(dyeTag, true));
+            return InteractionResult.SUCCESS;
+        }
+
+        return InteractionResult.PASS;
     }
 
     private static InteractionResult onAttackBlock(Player player, Level level, InteractionHand hand, BlockPos pos, Direction direction) {
@@ -72,7 +90,7 @@ public class Assigner {
         BlockState state = level.getBlockState(pos);
         if (!state.is(Blocks.DETECTOR_RAIL)) return InteractionResult.PASS;
 
-        DyeFilter current = FilterAttachment.get(level, pos);
+        Filter current = FilterAttachment.get(level, pos);
         if (current == null) return InteractionResult.PASS;
 
         level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 1f, 1f);
@@ -80,7 +98,7 @@ public class Assigner {
         return InteractionResult.SUCCESS;
     }
 
-    public static void update(ServerLevel level, BlockPos pos, DyeFilter filter) {
+    public static void update(ServerLevel level, BlockPos pos, Filter filter) {
         if (filter == null) FilterAttachment.remove(level, pos);
         else FilterAttachment.put(level, pos, filter);
 
@@ -94,10 +112,8 @@ public class Assigner {
                 level.addFreshEntity(display);
             }
 
-            ItemStack shown = filter.whitelist()
-                    ? Utils.DYE_TO_CONCRETE.get(filter.color())
-                    : Utils.DYE_TO_STAINED_GLASS.get(filter.color());
-            display.getSlot(0).set(shown.copy());
+            ItemStack shown = getIndicatorItem(filter);
+            display.getSlot(0).set(shown);
 
             BlockState state = level.getBlockState(pos);
             if (state.is(Blocks.DETECTOR_RAIL)) {
@@ -107,6 +123,16 @@ public class Assigner {
         } else if (display != null) {
             display.discard();
         }
+    }
+
+    private static ItemStack getIndicatorItem(Filter filter) {
+        DyeColor dye = filter.dyeColor();
+        if (dye != null) {
+            return (filter.whitelist()
+                    ? Utils.DYE_TO_CONCRETE.get(dye)
+                    : Utils.DYE_TO_STAINED_GLASS.get(dye)).copy();
+        }
+        return new ItemStack(Items.COMPASS);
     }
 
     public static Display.ItemDisplay findDisplay(ServerLevel level, BlockPos pos) {
