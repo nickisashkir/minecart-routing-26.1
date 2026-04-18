@@ -13,8 +13,16 @@ import java.util.Map;
 
 public class FilterAttachment {
 
+    private static final Codec<BlockPos> BLOCK_POS_STRING_CODEC = Codec.STRING.xmap(
+            s -> {
+                String[] p = s.split(",");
+                return new BlockPos(Integer.parseInt(p[0]), Integer.parseInt(p[1]), Integer.parseInt(p[2]));
+            },
+            pos -> pos.getX() + "," + pos.getY() + "," + pos.getZ()
+    );
+
     public static final Codec<Map<BlockPos, Filter>> MAP_CODEC =
-            Codec.unboundedMap(BlockPos.CODEC, Filter.CODEC);
+            Codec.unboundedMap(BLOCK_POS_STRING_CODEC, Filter.CODEC);
 
     public static AttachmentType<Map<BlockPos, Filter>> FILTERS;
 
