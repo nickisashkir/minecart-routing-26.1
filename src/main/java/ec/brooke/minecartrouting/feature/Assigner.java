@@ -65,8 +65,13 @@ public class Assigner {
     private static void onBlockBroken(Level level, Player player, BlockPos pos, BlockState state, net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
         if (!state.is(Blocks.DETECTOR_RAIL)) return;
         if (!(level instanceof ServerLevel sl)) return;
-        if (FilterAttachment.get(level, pos) == null) return;
-        updateFilter(sl, pos, null);
+
+        // Remove stored filter data if present. Always run display cleanup
+        // regardless, so orphaned displays without filter data also clear.
+        if (FilterAttachment.get(level, pos) != null) {
+            FilterAttachment.remove(level, pos);
+        }
+        updateDisplay(sl, pos, null);
     }
 
     private static InteractionResult onUseBlock(Player player, Level level, InteractionHand hand, BlockHitResult hit) {
