@@ -5,6 +5,7 @@ import ec.brooke.minecartrouting.mixin.DisplayAccessor;
 import ec.brooke.minecartrouting.mixin.TextDisplayAccessor;
 import ec.brooke.minecartrouting.store.Filter;
 import ec.brooke.minecartrouting.store.FilterAttachment;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -41,6 +42,24 @@ public class Assigner {
         UseBlockCallback.EVENT.register(Assigner::onUseBlock);
         AttackBlockCallback.EVENT.register(Assigner::onAttackBlock);
         PlayerBlockBreakEvents.AFTER.register(Assigner::onBlockBroken);
+        ServerChunkEvents.CHUNK_LOAD.register(Assigner::onChunkLoad);
+    }
+
+    private static void onChunkLoad(ServerLevel level, net.minecraft.world.level.chunk.LevelChunk chunk, boolean isNew) {
+        int minX = chunk.getPos().x() << 4;
+        int minZ = chunk.getPos().z() << 4;
+        AABB chunkBox = new AABB(minX, level.getMinY(), minZ, minX + 16, level.getMaxY(), minZ + 16);
+
+        for (Display display : level.getEntities(EntityType.ITEM_DISPLAY, chunkBox, e -> e.entityTags().contains(DISPLAY_TAG))) {
+            if (!level.getBlockState(display.blockPosition()).is(Blocks.DETECTOR_RAIL)) {
+                display.discard();
+            }
+        }
+        for (Display display : level.getEntities(EntityType.TEXT_DISPLAY, chunkBox, e -> e.entityTags().contains(DISPLAY_TAG))) {
+            if (!level.getBlockState(display.blockPosition()).is(Blocks.DETECTOR_RAIL)) {
+                display.discard();
+            }
+        }
     }
 
     private static void onBlockBroken(Level level, Player player, BlockPos pos, BlockState state, net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
