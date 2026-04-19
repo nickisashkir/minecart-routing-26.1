@@ -6,6 +6,7 @@ import ec.brooke.minecartrouting.mixin.TextDisplayAccessor;
 import ec.brooke.minecartrouting.store.Filter;
 import ec.brooke.minecartrouting.store.FilterAttachment;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,6 +40,14 @@ public class Assigner {
     public static void register() {
         UseBlockCallback.EVENT.register(Assigner::onUseBlock);
         AttackBlockCallback.EVENT.register(Assigner::onAttackBlock);
+        PlayerBlockBreakEvents.AFTER.register(Assigner::onBlockBroken);
+    }
+
+    private static void onBlockBroken(Level level, Player player, BlockPos pos, BlockState state, net.minecraft.world.level.block.entity.BlockEntity blockEntity) {
+        if (!state.is(Blocks.DETECTOR_RAIL)) return;
+        if (!(level instanceof ServerLevel sl)) return;
+        if (FilterAttachment.get(level, pos) == null) return;
+        updateFilter(sl, pos, null);
     }
 
     private static InteractionResult onUseBlock(Player player, Level level, InteractionHand hand, BlockHitResult hit) {
