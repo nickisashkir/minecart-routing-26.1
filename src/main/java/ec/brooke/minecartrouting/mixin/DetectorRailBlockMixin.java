@@ -53,8 +53,9 @@ public abstract class DetectorRailBlockMixin {
             return original;
         }
 
-        boolean matched = Router.anyMatches(original, filter);
-        Router.notifyPassengers(original, filter, matched);
+        boolean carried = Router.isAnyTagCarried(original, filter);
+        boolean matched = filter.whitelist() == carried;
+        Router.notifyPassengers(original, filter, carried);
         return matched ? original : List.of();
     }
 }

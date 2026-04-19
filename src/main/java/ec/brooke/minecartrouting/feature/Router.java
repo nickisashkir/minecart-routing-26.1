@@ -16,18 +16,34 @@ import java.util.List;
 
 public class Router {
 
-    public static boolean anyMatches(List<? extends AbstractMinecart> carts, Filter filter) {
+    /**
+     * Returns true if any cart (or its recursive passengers) carries a ticket
+     * whose tag is in the filter's tag list. Independent of whitelist mode --
+     * this answers "is the ticket physically present" not "does the filter
+     * match." The mixin uses this together with the whitelist flag to compute
+     * the actual match outcome and to produce the right action-bar message.
+     */
+    public static boolean isAnyTagCarried(List<? extends AbstractMinecart> carts, Filter filter) {
         for (AbstractMinecart cart : carts) {
-            if (testEntity(cart, filter)) return true;
+            if (entityCarriesAnyTag(cart, filter)) return true;
         }
         return false;
     }
 
-    public static void notifyPassengers(List<? extends AbstractMinecart> carts, Filter filter, boolean matched) {
+    public static void notifyPassengers(List<? extends AbstractMinecart> carts, Filter filter, boolean carried) {
         String label = filter.shortText();
-        Component msg = matched
-                ? Component.literal(label + " ticket found, routing to " + label + " path")
-                : Component.literal(label + " ticket not found, not staying on path");
+        boolean matched = filter.whitelist() == carried;
+
+        Component msg;
+        if (matched && carried) {
+            msg = Component.literal(label + " ticket matched, rerouting");
+        } else if (matched) {
+            msg = Component.literal("No " + label + " ticket, rerouting");
+        } else if (carried) {
+            msg = Component.literal(label + " ticket blocked, staying on path");
+        } else {
+            msg = Component.literal(label + " ticket not found, staying on path");
+        }
 
         for (AbstractMinecart cart : carts) {
             for (Player p : collectPlayers(cart)) {
@@ -49,45 +65,45 @@ public class Router {
         }
     }
 
-    private static boolean testEntity(Entity entity, Filter filter) {
-        if (checkInventory(entity, filter)) return true;
+    private static boolean entityCarriesAnyTag(Entity entity, Filter filter) {
+        if (containerHasTag(entity, filter)) return true;
         for (Entity passenger : entity.getPassengers()) {
-            if (testEntity(passenger, filter)) return true;
+            if (entityCarriesAnyTag(passenger, filter)) return true;
         }
         return false;
     }
 
-    private static boolean checkInventory(Entity entity, Filter filter) {
+    private static boolean containerHasTag(Entity entity, Filter filter) {
         if (entity instanceof Player player) {
-            return scanContainer(player.getInventory(), filter);
+            return scanContainerForTag(player.getInventory(), filter);
         }
         if (entity instanceof ContainerEntity vehicle) {
             NonNullList<ItemStack> stacks = vehicle.getItemStacks();
-            return scanStacks(stacks, filter);
+            return scanStacksForTag(stacks, filter);
         }
         if (entity instanceof Container inv) {
-            return scanContainer(inv, filter);
+            return scanContainerForTag(inv, filter);
         }
         return false;
     }
 
-    private static boolean scanContainer(Container inv, Filter filter) {
+    private static boolean scanContainerForTag(Container inv, Filter filter) {
         for (int i = 0; i < inv.getContainerSize(); i++) {
-            if (matches(inv.getItem(i), filter)) return true;
+            if (stackTagInList(inv.getItem(i), filter)) return true;
         }
         return false;
     }
 
-    private static boolean scanStacks(Iterable<ItemStack> stacks, Filter filter) {
+    private static boolean scanStacksForTag(Iterable<ItemStack> stacks, Filter filter) {
         for (ItemStack stack : stacks) {
-            if (matches(stack, filter)) return true;
+            if (stackTagInList(stack, filter)) return true;
         }
         return false;
     }
 
-    private static boolean matches(ItemStack stack, Filter filter) {
+    private static boolean stackTagInList(ItemStack stack, Filter filter) {
         if (!stack.is(Items.FILLED_MAP)) return false;
         String tag = Ticket.getTicket(stack);
-        return tag != null && filter.test(tag);
+        return tag != null && filter.tags().contains(tag);
     }
 }
