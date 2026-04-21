@@ -23,7 +23,14 @@ Filtered detector rails can also be inverted, so that they only activate with an
 Drop the built jar into your server's `mods/` folder. No client-side
 install required — vanilla clients connect as normal.
 
-## Toolchain pins
+## Compatible Minecraft versions
+
+The jar runs on **26.1, 26.1.1, and 26.1.2**. All three patch versions
+ship the same `DetectorRailBlock` signatures, so the mixin applies
+unchanged across all of them. `fabric.mod.json` declares
+`"minecraft": "~26.1"` which accepts any 26.1.x patch automatically.
+
+## Toolchain pins (for building from source)
 
 - Minecraft `26.1` (deobfuscated jar — no `client_mappings` published
   by Mojang, vanilla class names ship in the jar directly)

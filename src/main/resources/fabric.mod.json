@@ -3,7 +3,7 @@
   "id": "minecart_routing",
   "version": "${version}",
   "name": "Minecart Routing",
-  "description": "Ticket-based filtering for detector rails. Port of brooke.ec's Paper plugin.",
+  "description": "Ticket-based filtering for detector rails. Port of brooke.ec's Paper plugin. Compatible with Minecraft 26.1, 26.1.1, and 26.1.2.",
   "authors": ["brooke.ec", "fabric port"],
   "contact": {
     "sources": "https://github.com/brooke-ec/minecart-routing"
